@@ -1,0 +1,186 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use App\Models\Location;
+use App\Models\Transaction;
+use App\Models\WasteType;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TransactionStaffExport;
+use App\Exports\TransactionAdminExport;
+
+class TransactionController extends Controller
+{
+    public function index()
+    {
+        $role = auth()->user()->role;
+
+        if ($role === 'admin') {
+            $transaction = Transaction::with('user', 'wasteType', 'location')->latest()->get();
+            return view('admin.transaction.index', compact('transaction'));
+        }
+
+        // Staff hanya bisa melihat transaksi di lokasi sendiri
+        $transaction = Transaction::with('user', 'wasteType', 'location')->where('id_lokasi', auth()->user()->id_lokasi)->latest()->get();
+
+        return view('staff.transaction.index', compact('transaction'));
+    }
+
+    public function create()
+    {
+        $user = User::where('role', 'user')->get();
+        $wasteType = WasteType::all();
+
+        if (auth()->user()->role === 'admin') {
+            $location = Location::all();
+            return view('admin.transaction.create', compact('user', 'wasteType', 'location'));
+        }
+
+        return view('staff.transaction.create', compact('user', 'wasteType'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'id_user' => 'required|exists:users,id_user',
+            'id_jenis' => 'required|exists:waste_types,id_jenis',
+            'berat' => 'required|numeric|min:0.1',
+        ]);
+
+        $createData = [
+            'id_user' => $request->id_user,
+            'id_jenis' => $request->id_jenis,
+            'berat' => $request->berat,
+            'poin_didapat' => $this->hitungPoin($request->id_jenis, $request->berat),
+            'tanggal' => now(),
+            'status' => 'pending',
+        ];
+
+        if (auth()->user()->role === 'staff') {
+            $createData['id_lokasi'] = auth()->user()->id_lokasi;
+        } else {
+            $request->validate(['id_lokasi' => 'required|exists:locations,id_lokasi']);
+            $createData['id_lokasi'] = $request->id_lokasi;
+        }
+
+        Transaction::create($createData);
+
+        return auth()->user()->role === 'staff' ? redirect()->route('staff.transactions.index')->with('success', 'Transaksi berhasil ditambahkan!') : redirect()->route('admin.transactions.index')->with('success', 'Transaksi berhasil ditambahkan!');
+    }
+
+    public function updateStatus(Request $request, $id_transaksi)
+    {
+        $request->validate(['status' => 'required|in:pending,approved,completed,canceled']);
+
+        $transaction = Transaction::findOrFail($id_transaksi);
+        $transaction->update(['status' => $request->status]);
+
+        return auth()->user()->role === 'staff' ? redirect()->route('staff.transactions.index')->with('success', 'Status diperbarui!') : redirect()->route('admin.transactions.index')->with('success', 'Status diperbarui!');
+    }
+
+    private function hitungPoin($id_jenis, $berat)
+    {
+        //mengambil poin_per_kg di tabel waste_type dan dikalikan dengan berat di tabel transaction
+        $wasteType = WasteType::find($id_jenis);
+        return $wasteType->poin_per_kg * $berat;
+    }
+
+    public function edit($id_transaksi)
+    {
+        $transaction = Transaction::where('id_transaksi', $id_transaksi)->with(['user', 'wasteType', 'location'])->firstOrFail();
+        $user = User::where('role', 'user')->get();
+        $wasteType = WasteType::all();
+
+        if (auth()->user()->role === 'admin') {
+            $location = Location::all();
+            return view('admin.transaction.edit', compact('transaction', 'user', 'wasteType', 'location'));
+        } else {
+            return view('staff.transaction.edit', compact('transaction', 'user', 'wasteType'));
+        }
+    }
+
+    public function update(Request $request, $id_transaksi)
+    {
+        $transaction = Transaction::findOrFail($id_transaksi);
+
+        $request->validate([
+            'id_user' => 'required|exists:users,id_user',
+            'id_jenis' => 'required|exists:waste_types,id_jenis',
+            'berat' => 'required|numeric|min:0.1',
+        ]);
+
+        $updateData = [
+            'id_user' => $request->id_user,
+            'id_jenis' => $request->id_jenis,
+            'berat' => $request->berat,
+            'poin_didapat' => $this->hitungPoin($request->id_jenis, $request->berat),
+        ];
+
+        if (auth()->user()->role === 'admin') {
+            $request->validate(['id_lokasi' => 'required|exists:locations,id_lokasi']);
+            $updateData['id_lokasi'] = $request->id_lokasi;
+        } else {
+            $updateData['id_lokasi'] = auth()->user()->id_lokasi;
+        }
+
+        $transaction->update($updateData);
+
+        return auth()->user()->role === 'staff' ? redirect()->route('staff.transactions.index')->with('success', 'Transaksi diperbarui!') : redirect()->route('admin.transactions.index')->with('success', 'Transaksi diperbarui!');
+    }
+
+    public function destroy($id_transaksi)
+    {
+        $transaction = Transaction::findOrFail($id_transaksi);
+        $transaction->delete();
+
+        return auth()->user()->role === 'staff' ? redirect()->route('staff.transactions.index')->with('success', 'Transaksi berhasil dihapus!') : redirect()->route('admin.transactions.index')->with('success', 'Transaksi berhasil dihapus!');
+    }
+
+    public function trash()
+    {
+        if (auth()->user()->role === 'admin') {
+            $transaction = Transaction::onlyTrashed()->with('user', 'wasteType', 'location')->get();
+            return view('admin.transaction.trash', compact('transaction'));
+        } else {
+            $transaction = Transaction::onlyTrashed()->where('id_lokasi', auth()->user()->id_lokasi)->with('user', 'wasteType', 'location')->get();
+            return view('staff.transaction.trash', compact('transaction'));
+        }
+
+    }
+
+    public function restore($id_transaksi)
+    {
+        if (auth()->user()->role === 'admin') {
+            $transaction = Transaction::onlyTrashed()->findOrFail($id_transaksi);
+            $transaction->restore();
+            return redirect()->route('admin.transactions.index')->with('success', 'Transaksi berhasil dikembalikan!');
+        } else {
+            $transaction = Transaction::onlyTrashed()->findOrFail($id_transaksi);
+            $transaction->restore();
+            return redirect()->route('staff.transactions.index')->with('success', 'Transaksi berhasil dikembalikan!');
+        }
+    }
+
+    public function deletePermanent($id_transaksi)
+    {
+        $transaction = Transaction::onlyTrashed()->findOrFail($id_transaksi);
+        $transaction->forceDelete();
+
+        return redirect()->back()->with('success', 'Transaksi berhasil dihapus permanen!');
+    }
+
+    public function exportExcel()
+    {
+        if (auth()->user()->role == 'admin') {
+            $fileName = 'data-transaksi-admin.xlsx';
+            return Excel::download(new TransactionAdminExport, $fileName);
+        } else {
+            $fileName = 'data-transaksi-staff.xlsx';
+            $transactions = Transaction::with('user')->where('id_lokasi', auth()->user()->id_lokasi)->get();
+            return Excel::download(new TransactionStaffExport($transactions), $fileName);
+        }
+
+    }
+}
