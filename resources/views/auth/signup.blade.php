@@ -75,10 +75,9 @@
       </button>
 
       <!-- Back to Home -->
-      <div class="mt-4 text-center">
-        <a href="{{ route('home') }}" class="text-sm text-gray-600 hover:text-gray-800">
-          <i class="fa-solid fa-arrow-left mr-1"></i>Kembali
-        </a>
+      {{-- Kembali --}}
+      <div class="mt-6 text-xs font-semibold text-end">
+        <a href="{{ route('home') }}" class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-red-400 hover:text-white"> Kembali </a>
       </div>
     </form>
   </div>

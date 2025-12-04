@@ -12,6 +12,9 @@ class RewardRedemption extends Model
 
     protected $table = 'reward_redemptions';
     protected $primaryKey = 'id_tukar';
+    protected $casts = [
+        'tanggal_tukar' => 'date',
+    ];
 
     protected $fillable = [
         'id_user',
@@ -20,6 +23,20 @@ class RewardRedemption extends Model
         'tanggal_tukar',
         'status_tukar',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+        static::creating(function ($model) {
+            $today = now()->format('Y-m-d');
+            $lastRedeem = self::whereDate('tanggal_tukar', now()->toDateString())
+                ->orderBy('id_tukar', 'desc')
+                ->first();
+
+            $nextNumber = $lastRedeem ? ((int)substr($lastRedeem->no_transaksi, -4)) + 1 : 1;
+            $model->no_transaksi = 'THRR-' . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        });
+    }
 
     public function user()
     {

@@ -12,6 +12,9 @@ class Transaction extends Model
 
     protected $table = 'transactions';
     protected $primaryKey = 'id_transaksi';
+    protected $casts = [
+        'tanggal' => 'datetime:Y-m-d',
+    ];
 
     protected $fillable = [
         'no_transaksi',

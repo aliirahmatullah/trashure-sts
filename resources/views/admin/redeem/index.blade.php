@@ -1,5 +1,4 @@
 @extends('templates.nav')
-
 @section('navbar')
     <div class="container mx-auto mt-4">
         @if (session('success'))
@@ -11,21 +10,19 @@
                 {{ session('error') }}
             </div>
         @endif
-
         <div class="mb-4 flex items-center justify-end">
-            <a href="{{ route('admin.transactions.trash') }}"
+            <a href="{{ route('admin.redeems.trash') }}"
                 class="rounded-md bg-yellow-600 px-4 py-2 mr-2 text-sm font-medium text-white transition hover:bg-yellow-700">Data
                 Sampah</a>
-            <a href="{{ route('admin.transactions.export') }}"
+            <a href="{{ route('admin.redeems.export') }}"
                 class="rounded-md bg-blue-600 px-4 py-2 mr-2 text-sm font-medium text-white transition hover:bg-blue-700mom">Export
                 Data</a>
-            <a href="{{ route('admin.transactions.create') }}"
+            <a href="{{ route('admin.redeems.create') }}"
                 class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
                 Tambah Data
             </a>
         </div>
         <h1 class="text-xl font-semibold text-gray-800 mb-2">Data Transaksi</h1>
-
 
         <div class="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
             <table class="min-w-full divide-y divide-gray-200 text-sm text-gray-700">
@@ -39,46 +36,41 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 bg-white">
-                    @foreach ($transaction as $index => $key)
-                        <tr class="hover:bg-gray-50">
+                    @foreach ($redeem_reward as $index => $key)
+                        <tr class="hover bg-gray-50">
                             <td class="px-6 py-3 text-center">{{ $index + 1 }}</td>
                             <td class="px-6 py-3 text-center">{{ $key->user->nama }}</td>
                             <td class="px-6 py-3 text-center">{{ $key->no_transaksi }}</td>
-
-                            {{-- Status dengan warna --}}
                             <td class="px-6 py-3 text-center">
                                 <span
                                     class="rounded-full px-3 py-1 text-xs font-semibold
-                                @if ($key->status === 'pending') bg-yellow-200 text-yellow-700
-                                @elseif($key->status === 'approved') bg-blue-100 text-blue-700
-                                @elseif($key->status === 'completed') bg-green-100 text-green-700
-                                @elseif($key->status === 'canceled') bg-red-100 text-red-700 @endif">
-                                    {{ ucfirst($key->status) }}
+                                @if ($key->status_tukar == 'pending') bg-yellow-200 text-yellow-700
+                                @elseif($key->status_tukar == 'approved') bg-blue-100 text-blue-700
+                                @elseif($key->status_tukar == 'done') bg-green-100 text-green-700 @endif">
+                                    {{ ucfirst($key->status_tukar) }}
                                 </span>
                             </td>
 
-                            {{-- Aksi: dropdown ganti status + edit + hapus --}}
                             <td class="px-6 py-3 text-center">
                                 <div class="flex items-center justify-center gap-2">
 
-                                    {{-- Dropdown ganti status --}}
-                                    <form action="{{ route('admin.transactions.updateStatus', $key->id_transaksi) }}"
-                                        method="POST" class="inline">
+                                    {{-- Dropdown ganti status_tukar --}}
+                                    <form action="" method="POST" class="inline">
                                         @csrf @method('PATCH')
-                                        <select name="status" onchange="this.form.submit()"
+                                        <select name="status_tukar" onchange="this.form.submit()"
                                             class="rounded-md border border-gray-300 px-6 py-1 text-xs
-                                                @if ($key->status === 'pending') border-yellow-500 text-yellow-700
-                                                @elseif($key->status === 'approved') border-blue-400 text-blue-700
-                                                @elseif($key->status === 'completed') border-green-400 text-green-700
-                                                @elseif($key->status === 'canceled') border-red-400 text-red-700 @endif">
-                                            <option value="pending" {{ $key->status === 'pending' ? 'selected' : '' }}>
+                                                @if ($key->status_tukar === 'pending') border-yellow-500 text-yellow-700
+                                                @elseif($key->status_tukar === 'approved') border-blue-400 text-blue-700
+                                                @elseif($key->status_tukar === 'completed') border-green-400 text-green-700
+                                                @elseif($key->status_tukar === 'canceled') border-red-400 text-red-700 @endif">
+                                            <option value="pending"
+                                                {{ $key->status_tukar === 'pending' ? 'selected' : '' }}>
                                                 Pending</option>
-                                            <option value="approved" {{ $key->status === 'approved' ? 'selected' : '' }}>
+                                            <option value="approved"
+                                                {{ $key->status_tukar === 'approved' ? 'selected' : '' }}>
                                                 Approved</option>
-                                            <option value="completed" {{ $key->status === 'completed' ? 'selected' : '' }}>
-                                                Completed</option>
-                                            <option value="canceled" {{ $key->status === 'canceled' ? 'selected' : '' }}>
-                                                Canceled</option>
+                                            <option value="done" {{ $key->status_tukar === 'done' ? 'selected' : '' }}>
+                                                Done</option>
                                         </select>
                                     </form>
 
@@ -86,31 +78,27 @@
                                         onclick="openModal({
                                         no_transaksi: '{{ $key->no_transaksi }}',
                                         nama: '{{ $key->user->nama }}',
-                                        jenis_sampah: '{{ $key->wasteType->nama_jenis }}',
-                                        berat: '{{ $key->berat }} kg',
-                                        poin_didapat: '{{ $key->poin_didapat }}',
-                                        lokasi: '{{ $key->location->nama_lok ?? '-' }}',
-                                        tanggal: '{{ $key->tanggal }}',
-                                        status: '{{ ucfirst($key->status) }}'
+                                        nama_hadiah: '{{ $key->reward->nama_hadiah }}',
+                                        jumlah_hadiah: '{{ $key->jumlah_hadiah }}',
+                                        tanggal: '{{ $key->tanggal_tukar }}',
+                                        status_tukar: '{{ ucfirst($key->status_tukar) }}'
                                     })"
                                         class="rounded-md bg-slate-600 px-3 py-1 text-xs font-medium text-white hover:bg-slate-700">
                                         Detail
                                     </button>
 
-
                                     {{-- Tombol Edit --}}
-                                    <a href="{{ route('admin.transactions.edit', $key->id_transaksi) }}"
+                                    <a href="{{ route('admin.redeems.edit', $key->id_tukar) }}"
                                         class="rounded-md bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700">Edit</a>
 
                                     {{-- Tombol Hapus --}}
-                                    <form action="{{ route('admin.transactions.delete', $key->id_transaksi) }}"
-                                        method="POST" class="inline">
+                                    <form action="{{ route('admin.redeems.delete', $key->id_tukar) }}" method="POST"
+                                        class="inline">
                                         @csrf @method('DELETE')
                                         <button type="submit"
                                             class="rounded-md bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700">Hapus</button>
                                     </form>
                                 </div>
-                            </td>
                         </tr>
                     @endforeach
                 </tbody>
@@ -134,12 +122,10 @@
                 <p><span class="font-medium text-black">No.Transaksi:</span> <span id="detTransaksi"
                         class="text-black"></span></p>
                 <p><span class="font-medium text-black">Nama:</span> <span id="detNama" class="text-black"></span></p>
-                <p><span class="font-medium text-black">Jenis Sampah:</span> <span id="detSampah" class="text-black"></span>
+                <p><span class="font-medium text-black">Nama Hadiah:</span> <span id="detHadiah" class="text-black"></span>
                 </p>
-                <p><span class="font-medium text-black">Berat:</span> <span id="detBerat" class="text-black"></span></p>
-                <p><span class="font-medium text-black">Poin Didapat:</span> <span id="detPoin" class="text-black"></span>
-                </p>
-                <p><span class="font-medium text-black">Lokasi:</span> <span id="detLokasi" class="text-black"></span></p>
+                <p><span class="font-medium text-black">Jumlah Hadiah:</span> <span id="detJumlah"
+                        class="text-black"></span></p>
                 <p><span class="font-medium text-black">Tanggal:</span> <span id="detTanggal" class="text-black"></span></p>
                 <p><span class="font-medium text-black">Status:</span> <span id="detStatus" class="text-black"></span></p>
             </div>
@@ -152,17 +138,14 @@
             </div>
         </div>
     </div>
-
     <script>
         function openModal(data) {
             document.getElementById('detTransaksi').textContent = data.no_transaksi ?? '-';
             document.getElementById('detNama').textContent = data.nama ?? '-';
-            document.getElementById('detSampah').textContent = data.jenis_sampah ?? '-';
-            document.getElementById('detBerat').textContent = data.berat ?? '-';
-            document.getElementById('detPoin').textContent = data.poin_didapat ?? '-';
-            document.getElementById('detLokasi').textContent = data.lokasi ?? '-';
+            document.getElementById('detHadiah').textContent = data.nama_hadiah ?? '-';
+            document.getElementById('detJumlah').textContent = data.jumlah_hadiah ?? '-';
             document.getElementById('detTanggal').textContent = data.tanggal ?? '-';
-            document.getElementById('detStatus').textContent = data.status ?? '-';
+            document.getElementById('detStatus').textContent = data.status_tukar ?? '-';
             document.getElementById('detailModal').classList.remove('hidden');
             document.getElementById('detailModal').classList.add('flex');
         }

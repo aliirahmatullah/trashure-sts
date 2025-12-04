@@ -14,6 +14,10 @@ class User extends Authenticatable
 
     protected $table = 'users';
     protected $primaryKey = 'id_user';
+    protected $casts = [
+        'poin' => 'integer',
+        'total_poin' => 'integer',
+    ];
 
     protected $fillable = [
         'nama',
@@ -21,6 +25,8 @@ class User extends Authenticatable
         'password',
         'alamat',
         'no_hp',
+        'poin',
+        'total_poin',
         'role',
         'tanggal_daftar',
         'id_lokasi', // relasi ke location

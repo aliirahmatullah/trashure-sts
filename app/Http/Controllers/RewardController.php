@@ -17,6 +17,18 @@ class RewardController extends Controller
         return view('admin.reward.index', compact('reward'));
     }
 
+    public function home()
+    {
+        $reward = Reward::where('stok', '>', 0)->orderBy('created_at', 'desc')->limit(4)->get();
+        return view('home', compact('reward'));
+    }
+
+    public function homeReward()
+    {
+        $reward = Reward::where('stok', '>', 0)->orderBy('created_at', 'desc')->get();
+        return view('reward', compact('reward'));
+    }
+
     public function create()
     {
         return view('admin.reward.create');

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Location;
 use App\Models\Transaction;
 use App\Models\WasteType;
+use App\Models\RewardRedemption;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\TransactionStaffExport;
@@ -26,6 +27,42 @@ class TransactionController extends Controller
         $transaction = Transaction::with('user', 'wasteType', 'location')->where('id_lokasi', auth()->user()->id_lokasi)->latest()->get();
 
         return view('staff.transaction.index', compact('transaction'));
+    }
+
+    public function myPoint()
+    {
+        $user = auth()->user();
+        $redeemHistory = RewardRedemption::where('id_user', $user->id_user)
+            ->with('reward') // relasi ke tabel reward
+            ->latest()
+            ->paginate(10);
+
+        // menghitung total point
+        $totalEarned = $user->total_poin;
+
+        // menghitung total point yang telah digunakan
+        $totalSpent = RewardRedemption::where('id_user', $user->id_user)
+            ->whereIn('status_tukar', ['pending', 'approved', 'done'])
+            ->join('rewards', 'rewards.id_hadiah', '=', 'reward_redemptions.id_hadiah')
+            ->sum('rewards.p_dibutuhkan');
+
+        // menghitung total sisa point
+        $totalSisa = $user->poin;
+
+        $transactions = Transaction::with(['wasteType', 'location'])
+            ->where('id_user', $user->id_user)
+            ->where('status', 'completed')
+            ->latest()
+            ->paginate(10);
+
+        return view('user.points.index', compact(
+            'user',
+            'transactions',
+            'totalEarned',
+            'totalSpent',
+            'totalSisa',
+            'redeemHistory'
+        ));
     }
 
     public function create()
@@ -74,10 +111,25 @@ class TransactionController extends Controller
     {
         $request->validate(['status' => 'required|in:pending,approved,completed,canceled']);
 
-        $transaction = Transaction::findOrFail($id_transaksi);
-        $transaction->update(['status' => $request->status]);
+        $trx = Transaction::findOrFail($id_transaksi);
+        $oldStatus = $trx->status;
+        $trx->update(['status' => $request->status]);
 
-        return auth()->user()->role === 'staff' ? redirect()->route('staff.transactions.index')->with('success', 'Status diperbarui!') : redirect()->route('admin.transactions.index')->with('success', 'Status diperbarui!');
+        // kalau baru jadi "completed" → tambah poin
+        if ($request->status === 'completed' && $oldStatus !== 'completed') {
+            $user = User::find($trx->id_user);
+            $user->increment('poin', $trx->poin_didapat);
+            $user->increment('total_poin', $trx->poin_didapat);
+        }
+
+        // kalau dicancel/ditolak & sebelumnya completed → kembalikan poin
+        if ($request->status !== 'completed' && $oldStatus === 'completed') {
+            $user = User::find($trx->id_user);
+            $user->decrement('poin', $trx->poin_didapat);
+            $user->decrement('total_poin', $trx->poin_didapat);
+        }
+
+        return back()->with('success', 'Status diperbarui.');
     }
 
     private function hitungPoin($id_jenis, $berat)
@@ -147,7 +199,6 @@ class TransactionController extends Controller
             $transaction = Transaction::onlyTrashed()->where('id_lokasi', auth()->user()->id_lokasi)->with('user', 'wasteType', 'location')->get();
             return view('staff.transaction.trash', compact('transaction'));
         }
-
     }
 
     public function restore($id_transaksi)
@@ -181,6 +232,5 @@ class TransactionController extends Controller
             $transactions = Transaction::with('user')->where('id_lokasi', auth()->user()->id_lokasi)->get();
             return Excel::download(new TransactionStaffExport($transactions), $fileName);
         }
-
     }
 }

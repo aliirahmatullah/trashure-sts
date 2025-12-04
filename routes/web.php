@@ -5,13 +5,11 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\WasteTypeController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\TransactionController;
-use App\Http\Controllers\PointController;
 use App\Http\Controllers\RewardController;
 use App\Http\Controllers\RewardRedemptionController;
 
-Route::get('/', function () {
-    return view('home');
-})->name('home');
+Route::get('/', [RewardController::class, 'home'])->name('home');
+Route::get('/reward/active', [RewardController::class, 'homeReward'])->name('home.reward.active');
 
 Route::get('/login', function () {
     return view('auth.login');
@@ -24,6 +22,13 @@ Route::get('/signup', function () {
 Route::post('/signup', [UserController::class, 'register'])->name('signup.register');
 Route::post('/login', [UserController::class, 'loginAuth'])->name('login.auth');
 Route::get('/logout', [UserController::class, 'logout'])->name('logout');
+
+// User area
+Route::middleware(['auth', 'isUser'])->prefix('my')->name('user.')->group(function () {
+    Route::get('/points', [TransactionController::class, 'myPoint'])->name('points.index');
+    Route::get('/redeem/form/{id_hadiah}', [RewardRedemptionController::class, 'form'])->name('redeem.form');
+    Route::post('/redeem/{id_hadiah}', [RewardRedemptionController::class, 'store'])->name('redeem.process');
+});
 
 // Admin area
 Route::middleware('isAdmin')->prefix('admin')->name('admin.')->group(function () {
@@ -63,7 +68,7 @@ Route::middleware('isAdmin')->prefix('admin')->name('admin.')->group(function ()
     Route::prefix('locations')->name('locations.')->group(function () {
         // AJAX dropdown kota
         Route::get('api/cities/{province}', [LocationController::class, 'cities'])
-             ->name('api.cities');
+            ->name('api.cities');
 
         // CRUD manual
         Route::get('/', [LocationController::class, 'index'])->name('index');
@@ -90,7 +95,6 @@ Route::middleware('isAdmin')->prefix('admin')->name('admin.')->group(function ()
         Route::get('/trash', [RewardController::class, 'trash'])->name('trash');
         Route::patch('/restore/{id_hadiah}', [RewardController::class, 'restore'])->name('restore');
         Route::delete('/delete-permanent/{id_hadiah}', [RewardController::class, 'deletePermanent'])->name('delete_permanent');
-
     });
 
     //Data Transaksi
@@ -106,6 +110,21 @@ Route::middleware('isAdmin')->prefix('admin')->name('admin.')->group(function ()
         Route::get('/trash', [TransactionController::class, 'trash'])->name('trash');
         Route::patch('/restore/{id_transaksi}', [TransactionController::class, 'restore'])->name('restore');
         Route::delete('/delete-permanent/{id_transaksi}', [TransactionController::class, 'deletePermanent'])->name('delete_permanent');
+    });
+
+    // Data Redeem Reward
+    Route::prefix('redeems')->name('redeems.')->group(function () {
+        Route::get('/', [RewardRedemptionController::class, 'index'])->name('index');
+        Route::get('/create', [RewardRedemptionController::class, 'create'])->name('create');
+        Route::post('/store', [RewardRedemptionController::class, 'store'])->name('store');
+        Route::get('/edit/{id_tukar}', [RewardRedemptionController::class, 'edit'])->name('edit');
+        Route::put('/update/{id_tukar}', [RewardRedemptionController::class, 'update'])->name('update');
+        Route::delete('/delete/{id_tukar}', [RewardRedemptionController::class, 'destroy'])->name('delete');
+        Route::patch('/{redeem}/status', [RewardRedemptionController::class, 'updateStatus'])->name('updateStatus');
+        Route::get('/export', [RewardRedemptionController::class, 'exportExcel'])->name('export');
+        Route::get('/trash', [RewardRedemptionController::class, 'trash'])->name('trash');
+        Route::patch('/restore/{id_tukar}', [RewardRedemptionController::class, 'restore'])->name('restore');
+        Route::delete('/delete-permanent/{id_tukar}', [RewardRedemptionController::class, 'deletePermanent'])->name('delete_permanent');
     });
 });
 
