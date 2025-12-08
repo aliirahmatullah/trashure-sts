@@ -123,7 +123,7 @@ class RewardController extends Controller
     public function restore($id_hadiah) {
         $reward = Reward::onlyTrashed()->find($id_hadiah);
         $reward->restore();
-        return redirect()->route('admin.rewards.index')->with('success', 'Berhasil mengembalikan data!');
+        return redirect()->route('admin.rewards.trash')->with('success', 'Berhasil mengembalikan data!');
     }
 
     public function deletePermanent($id_hadiah) {

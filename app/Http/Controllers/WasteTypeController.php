@@ -130,7 +130,7 @@ class WasteTypeController extends Controller
     {
         $wasteType = WasteType::onlyTrashed()->find($id_jenis);
         $wasteType->restore();
-        return redirect()->route('admin.waste-types.index')->with('success', 'Berhasil mengembalikan data!');
+        return redirect()->route('admin.waste-types.trash')->with('success', 'Berhasil mengembalikan data!');
     }
 
     public function deletePermanent($id_jenis)

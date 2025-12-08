@@ -16,7 +16,7 @@
     {{-- Header & Tombol Tambah --}}
     <div class="mb-4 flex items-center justify-end">
         <a href="{{ route('admin.locations.trash')}}" class="rounded-md bg-yellow-600 px-4 py-2 mr-2 text-sm font-medium text-white transition hover:bg-yellow-700">Data Sampah</a>
-        <a href="{{ route('admin.locations.export')}}" class="rounded-md bg-blue-600 px-4 py-2 mr-2 text-sm font-medium text-white transition hover:bg-blue-700mom">Export Data</a>
+        <a href="{{ route('admin.locations.export')}}" class="rounded-md bg-blue-600 px-4 py-2 mr-2 text-sm font-medium text-white transition hover:bg-blue-700mom">Export Data (.xlsx)</a>
         <a href="{{ route('admin.locations.create') }}"
            class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-700">
             Tambah Data

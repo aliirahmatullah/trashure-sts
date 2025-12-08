@@ -32,6 +32,8 @@ Route::middleware(['auth', 'isUser'])->prefix('my')->name('user.')->group(functi
 
 // Admin area
 Route::middleware('isAdmin')->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/redeem/chart', [RewardRedemptionController::class, 'dataChart'])->name('redeems.chart');
+    Route::get('/transaction/chart', [TransactionController::class, 'dataChart'])->name('transactions.chart');
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('dashboard');
@@ -107,6 +109,7 @@ Route::middleware('isAdmin')->prefix('admin')->name('admin.')->group(function ()
         Route::delete('/delete/{id_transaksi}', [TransactionController::class, 'destroy'])->name('delete');
         Route::patch('/{transaction}/status', [TransactionController::class, 'updateStatus'])->name('updateStatus');
         Route::get('/export', [TransactionController::class, 'exportExcel'])->name('export');
+        Route::get('/pdf', [TransactionController::class, 'exportPDF'])->name('export-pdf');
         Route::get('/trash', [TransactionController::class, 'trash'])->name('trash');
         Route::patch('/restore/{id_transaksi}', [TransactionController::class, 'restore'])->name('restore');
         Route::delete('/delete-permanent/{id_transaksi}', [TransactionController::class, 'deletePermanent'])->name('delete_permanent');
@@ -115,21 +118,23 @@ Route::middleware('isAdmin')->prefix('admin')->name('admin.')->group(function ()
     // Data Redeem Reward
     Route::prefix('redeems')->name('redeems.')->group(function () {
         Route::get('/', [RewardRedemptionController::class, 'index'])->name('index');
-        Route::get('/create', [RewardRedemptionController::class, 'create'])->name('create');
-        Route::post('/store', [RewardRedemptionController::class, 'store'])->name('store');
         Route::get('/edit/{id_tukar}', [RewardRedemptionController::class, 'edit'])->name('edit');
         Route::put('/update/{id_tukar}', [RewardRedemptionController::class, 'update'])->name('update');
         Route::delete('/delete/{id_tukar}', [RewardRedemptionController::class, 'destroy'])->name('delete');
-        Route::patch('/{redeem}/status', [RewardRedemptionController::class, 'updateStatus'])->name('updateStatus');
+        Route::patch('/{id_tukar}/status', [RewardRedemptionController::class, 'updateStatus'])->name('updateStatus');
         Route::get('/export', [RewardRedemptionController::class, 'exportExcel'])->name('export');
+        // export pdf
+        Route::get('/pdf', [RewardRedemptionController::class, 'exportPDF'])->name('export-pdf');
         Route::get('/trash', [RewardRedemptionController::class, 'trash'])->name('trash');
         Route::patch('/restore/{id_tukar}', [RewardRedemptionController::class, 'restore'])->name('restore');
         Route::delete('/delete-permanent/{id_tukar}', [RewardRedemptionController::class, 'deletePermanent'])->name('delete_permanent');
+        // chart.js
     });
 });
 
 // Staff area
 Route::middleware('isStaff')->prefix('staff')->name('staff.')->group(function () {
+    Route::get('/transaction/chart', [RewardRedemptionController::class, 'dataChart'])->name('transactions.chart');
     Route::get('/dashboard', function () {
         return view('staff.dashboard');
     })->name('dashboard');
@@ -144,6 +149,7 @@ Route::middleware('isStaff')->prefix('staff')->name('staff.')->group(function ()
         Route::delete('/delete/{id_transaksi}', [TransactionController::class, 'destroy'])->name('delete');
         Route::patch('/{transaction}/status', [TransactionController::class, 'updateStatus'])->name('updateStatus');
         Route::get('/export', [TransactionController::class, 'exportExcel'])->name('export');
+        Route::get('/pdf', [TransactionController::class, 'exportPDF'])->name('export-pdf');
         Route::get('/trash', [TransactionController::class, 'trash'])->name('trash');
         Route::patch('/restore/{id_transaksi}', [TransactionController::class, 'restore'])->name('restore');
         Route::delete('/delete-permanent/{id_transaksi}', [TransactionController::class, 'deletePermanent'])->name('delete_permanent');

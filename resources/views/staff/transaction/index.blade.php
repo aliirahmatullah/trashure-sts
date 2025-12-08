@@ -15,7 +15,8 @@
     <div class="mb-4 flex items-center justify-end">
         {{-- Staff tidak bisa tambah data dari index --}}
         <a href="{{ route('staff.transactions.trash')}}" class="rounded-md bg-yellow-600 px-4 py-2 mr-2 text-sm font-medium text-white transition hover:bg-yellow-700">Data Sampah</a>
-        <a href="{{ route('staff.transactions.export')}}" class="rounded-md bg-blue-600 px-4 py-2 mr-2 text-sm font-medium text-white transition hover:bg-blue-700mom">Export Data</a>
+        <a href="{{ route('staff.transactions.export')}}" class="rounded-md bg-blue-600 px-4 py-2 mr-2 text-sm font-medium text-white transition hover:bg-blue-700mom">Export Data (.xlsx)</a>
+        <a href="{{ route('staff.transactions.export-pdf')}}" class="rounded-md bg-red-600 px-4 py-2 mr-2 text-sm font-medium text-white transition hover:bg-blue-700mom">Export Data (.pdf)</a>
         <a href="{{ route('staff.transactions.create') }}" class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
             Tambah Data
         </a>
@@ -82,7 +83,7 @@
                                         berat: '{{ $key->berat }} kg',
                                         poin_didapat: '{{ $key->poin_didapat }}',
                                         lokasi: '{{ $key->location->nama_lok ?? '-' }}',
-                                        tanggal: '{{ $key->tanggal }}',
+                                        tanggal: '{{ \Carbon\Carbon::parse($key->tanggal)->format('d-m-Y') }}',
                                         status: '{{ ucfirst( $key->status) }}'
                                     })"
                                     class="rounded-md bg-slate-600 px-3 py-1 text-xs font-medium text-white hover:bg-slate-700">

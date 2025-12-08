@@ -118,7 +118,7 @@ class LocationController extends Controller
     {
         $location = Location::onlyTrashed()->find($id_lokasi);
         $location->restore();
-        return redirect()->route('admin.locations.index')->with('success', 'Berhasil mengembalikan data!');
+        return redirect()->route('admin.locations.trash')->with('success', 'Berhasil mengembalikan data!');
     }
 
     public function deletePermanent($id_lokasi)

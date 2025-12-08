@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
     <title>Trashure</title>
     @vite('resources/css/app.css')
@@ -70,8 +71,6 @@
                         @if (Auth::check() && Auth::user()->role == 'admin')
                             <li><a href="{{ route('admin.dashboard') }}"
                                     class="nav-link text-gray-600 hover:text-teal-600">Dashboard</a></li>
-                            <li><a href="#" class="nav-link text-gray-600 hover:text-teal-600">Laporan &
-                                    Statistik</a></li>
 
                             <!-- Dropdown Data Master -->
                             <li class="relative">
@@ -100,9 +99,6 @@
                                         <a href="{{ route('admin.transactions.index') }}"
                                             class="block px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-teal-50 hover:text-teal-700">Data
                                             Transaksi</a>
-                                        <a href="#"
-                                            class="block px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-teal-50 hover:text-teal-700">Data
-                                            Poin</a>
                                         <a href="{{ route('admin.rewards.index') }}"
                                             class="block px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-teal-50 hover:text-teal-700">Data
                                             Reward</a>
@@ -119,11 +115,6 @@
                                     class="nav-link text-gray-600 hover:text-teal-600">Dashboard</a></li>
                             <li><a href="{{ route('staff.transactions.index') }}"
                                     class="nav-link text-gray-600 hover:text-teal-600">Kelola Transaksi</a></li>
-                            <li><a href="#" class="nav-link text-gray-600 hover:text-teal-600">Kelola Poin</a>
-                            </li>
-                            <li><a href="#" class="nav-link text-gray-600 hover:text-teal-600">Laporan Harian</a>
-                            </li>
-
                             <!-- Navbar User  -->
                         @else
                             @if (request()->routeIs('home.reward.active'))
@@ -135,13 +126,6 @@
                                     </a>
                                 </li>
                             @else
-                                <li>
-                                    <a href="#about" class="nav-link text-gray-600 hover:text-teal-600">About</a>
-                                </li>
-                                <li>
-                                    <a href="#works" class="nav-link text-gray-600 hover:text-teal-600">How It
-                                        Works</a>
-                                </li>
                                 <li>
                                     <a href="#reward" class="nav-link text-gray-600 hover:text-teal-600">Redeem
                                         Rewards</a>
@@ -183,6 +167,8 @@
     @yield('navbar')
 
     <script src="https://cdn.tailwindcss.com"></script>
+    {{-- CDN Chart.JS --}}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Script click-to-open -->
     <script>
@@ -205,67 +191,71 @@
     </script>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-gray-200 mt-16">
-        <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-sm text-gray-600">
+    @if (!Auth::check() || Auth::user()->role === 'user')
+        <footer class="bg-white border-t border-gray-200 mt-16">
+            <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-sm text-gray-600">
 
-                <div class="md:col-span-1">
-                    <a href="{{ route('home') }}" class="flex items-center gap-2 text-teal-600 font-semibold">
-                        <img src="{{ asset('asset/logo.jpg') }}" alt="Trashure" class="h-10 w-auto object-contain">
-                        <span>Trashure</span>
-                    </a>
-                    <p class="mt-3">Kelola sampahmu, raih manfaatnya.</p>
-                </div>
+                    <div class="md:col-span-1">
+                        <a href="{{ route('home') }}" class="flex items-center gap-2 text-teal-600 font-semibold">
+                            <img src="{{ asset('asset/logo.jpg') }}" alt="Trashure" class="h-10 w-auto object-contain">
+                            <span>Trashure</span>
+                        </a>
+                        <p class="mt-3">Kelola sampahmu, raih manfaatnya.</p>
+                    </div>
 
-                <div>
-                    <h6 class="font-semibold text-gray-800 mb-3">Menu</h6>
-                    <ul class="space-y-2">
-                        <li><a href="{{ route('home') }}" class="hover:text-teal-600 transition">Home</a></li>
-                        <li><a href="#" class="hover:text-teal-600 transition">About</a></li>
-                        <li><a href="{{ route('home.reward.active') }}"
-                                class="hover:text-teal-600 transition">Rewards</a></li>
-                        <li><a href="#" class="hover:text-teal-600 transition">My Points</a></li>
-                    </ul>
-                </div>
+                    <div>
+                        <h6 class="font-semibold text-gray-800 mb-3">Menu</h6>
+                        <ul class="space-y-2">
+                            <li><a href="{{ route('home') }}" class="hover:text-teal-600 transition">Home</a></li>
+                            <li><a href="{{ route('home.reward.active') }}"
+                                    class="hover:text-teal-600 transition">Rewards</a></li>
+                            <li><a href="{{ route('user.points.index') }}" class="hover:text-teal-600 transition">My Points</a></li>
+                        </ul>
+                    </div>
 
-                <div>
-                    <h6 class="font-semibold text-gray-800 mb-3">Bantuan</h6>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="hover:text-teal-600 transition">Syarat & Ketentuan</a></li>
-                        <li><a href="#" class="hover:text-teal-600 transition">Kebijakan Privasi</a></li>
-                        <li><a href="#" class="hover:text-teal-600 transition">FAQ</a></li>
-                        <li><a href="#" class="hover:text-teal-600 transition">Kontak Kami</a></li>
-                    </ul>
-                </div>
+                    <div>
+                        <h6 class="font-semibold text-gray-800 mb-3">Bantuan</h6>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="hover:text-teal-600 transition">Syarat & Ketentuan</a></li>
+                            <li><a href="#" class="hover:text-teal-600 transition">Kebijakan Privasi</a></li>
+                            <li><a href="#" class="hover:text-teal-600 transition">FAQ</a></li>
+                            <li><a href="#" class="hover:text-teal-600 transition">Kontak Kami</a></li>
+                        </ul>
+                    </div>
 
-                <div>
-                    <h6 class="font-semibold text-gray-800 mb-3">Ikuti Kami</h6>
-                    <div class="flex gap-4 text-lg">
-                        <a href="#" aria-label="Facebook"
-                            class="text-gray-400 hover:text-teal-600 transition"><i
-                                class="fa-brands fa-facebook"></i></a>
-                        <a href="#" aria-label="Instagram"
-                            class="text-gray-400 hover:text-teal-600 transition"><i
-                                class="fa-brands fa-instagram"></i></a>
-                        <a href="#" aria-label="Twitter"
-                            class="text-gray-400 hover:text-teal-600 transition"><i
-                                class="fa-brands fa-twitter"></i></a>
-                        <a href="#" aria-label="TikTok" class="text-gray-400 hover:text-teal-600 transition"><i
-                                class="fa-brands fa-tiktok"></i></a>
+                    <div>
+                        <h6 class="font-semibold text-gray-800 mb-3">Ikuti Kami</h6>
+                        <div class="flex gap-4 text-lg">
+                            <a href="#" aria-label="Facebook"
+                                class="text-gray-400 hover:text-teal-600 transition"><i
+                                    class="fa-brands fa-facebook"></i></a>
+                            <a href="#" aria-label="Instagram"
+                                class="text-gray-400 hover:text-teal-600 transition"><i
+                                    class="fa-brands fa-instagram"></i></a>
+                            <a href="#" aria-label="Twitter"
+                                class="text-gray-400 hover:text-teal-600 transition"><i
+                                    class="fa-brands fa-twitter"></i></a>
+                            <a href="#" aria-label="TikTok"
+                                class="text-gray-400 hover:text-teal-600 transition"><i
+                                    class="fa-brands fa-tiktok"></i></a>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
-                © <span id="year"></span> Trashure. All rights reserved.
+                <div class="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
+                    © <span id="year"></span> Trashure. All rights reserved.
+                </div>
             </div>
-        </div>
-    </footer>
+        </footer>
+    @endif
 
     <script>
         // auto-update tahun
         document.getElementById('year').textContent = new Date().getFullYear();
     </script>
+
+    @stack('script')
 </body>
 
 </html>

@@ -11,6 +11,10 @@ use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\TransactionStaffExport;
 use App\Exports\TransactionAdminExport;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
+use function Symfony\Component\Clock\now;
+use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
@@ -86,26 +90,48 @@ class TransactionController extends Controller
             'berat' => 'required|numeric|min:0.1',
         ]);
 
-        $createData = [
-            'id_user' => $request->id_user,
-            'id_jenis' => $request->id_jenis,
-            'berat' => $request->berat,
-            'poin_didapat' => $this->hitungPoin($request->id_jenis, $request->berat),
-            'tanggal' => now(),
-            'status' => 'pending',
-        ];
+        DB::transaction(function () use ($request) {
+            // Format : TRSH-YYYYMMDD-0001
+            $today = now()->format('Ymd');
+            // Ambil transaksi terakhir di hari ini
+            $lastTransaction = Transaction::whereDate('created_at', now()->format('Y-m-d'))
+                ->orderBy('id_transaksi', 'desc')
+                ->lockForUpdate()
+                ->first();
 
-        if (auth()->user()->role === 'staff') {
-            $createData['id_lokasi'] = auth()->user()->id_lokasi;
-        } else {
-            $request->validate(['id_lokasi' => 'required|exists:locations,id_lokasi']);
-            $createData['id_lokasi'] = $request->id_lokasi;
-        }
+            // Ambil nomor urut berikutnya
+            $nextNumber = $lastTransaction
+                ? ((int) substr($lastTransaction->no_transaksi, -4)) + 1
+                : 1;
 
-        Transaction::create($createData);
+            // Bentuk kode transaksi
+            $no_transaksi = 'TRSH-' . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
 
-        return auth()->user()->role === 'staff' ? redirect()->route('staff.transactions.index')->with('success', 'Transaksi berhasil ditambahkan!') : redirect()->route('admin.transactions.index')->with('success', 'Transaksi berhasil ditambahkan!');
+            $createData = [
+                'no_transaksi' => $no_transaksi,
+                'id_user' => $request->id_user,
+                'id_jenis' => $request->id_jenis,
+                'berat' => $request->berat,
+                'poin_didapat' => $this->hitungPoin($request->id_jenis, $request->berat),
+                'tanggal' => now(),
+                'status' => 'pending',
+            ];
+
+            if (auth()->user()->role === 'staff') {
+                $createData['id_lokasi'] = auth()->user()->id_lokasi;
+            } else {
+                $createData['id_lokasi'] = $request->id_lokasi;
+            }
+
+            Transaction::create($createData);
+        });
+
+        return auth()->user()->role === 'staff'
+            ? redirect()->route('staff.transactions.index')->with('success', 'Transaksi berhasil ditambahkan!')
+            : redirect()->route('admin.transactions.index')->with('success', 'Transaksi berhasil ditambahkan!');
     }
+
+
 
     public function updateStatus(Request $request, $id_transaksi)
     {
@@ -206,11 +232,11 @@ class TransactionController extends Controller
         if (auth()->user()->role === 'admin') {
             $transaction = Transaction::onlyTrashed()->findOrFail($id_transaksi);
             $transaction->restore();
-            return redirect()->route('admin.transactions.index')->with('success', 'Transaksi berhasil dikembalikan!');
+            return redirect()->route('admin.transactions.trash')->with('success', 'Berhasil mengembalikan data!');
         } else {
             $transaction = Transaction::onlyTrashed()->findOrFail($id_transaksi);
             $transaction->restore();
-            return redirect()->route('staff.transactions.index')->with('success', 'Transaksi berhasil dikembalikan!');
+            return redirect()->route('staff.transactions.trash')->with('success', 'Berhasil mengembalikan data!');
         }
     }
 
@@ -232,5 +258,42 @@ class TransactionController extends Controller
             $transactions = Transaction::with('user')->where('id_lokasi', auth()->user()->id_lokasi)->get();
             return Excel::download(new TransactionStaffExport($transactions), $fileName);
         }
+    }
+
+    public function exportPDF()
+    {
+        if (auth()->user()->role == 'admin') {
+            $transactions = Transaction::with('user', 'wasteType', 'location')->get();
+            $pdf = PDF::loadView('admin.transaction.export-pdf', compact('transactions'));
+            return $pdf->download('data-transaksi-admin.pdf');
+        } else {
+            $transactions = Transaction::with('user', 'wasteType', 'location')->where('id_lokasi', auth()->user()->id_lokasi)->get();
+            $pdf = PDF::loadView('staff.transaction.export-pdf', compact('transactions'));
+            return $pdf->download('data-transaksi-staff.pdf');
+        }
+    }
+
+    public function dataChart()
+    {
+        $month = now()->format('m');
+        if (auth()->user()->role === 'admin') {
+            $transactions = Transaction::with('user', 'wasteType', 'location')->whereMonth('tanggal', $month)->get()->groupBy(function ($transaction) {
+                return Carbon::parse($transaction->tanggal)->format('d');
+            })->toArray();
+        } else {
+            $transactions = Transaction::with('user', 'wasteType', 'location')->where('id_lokasi', auth()->user()->id_lokasi)->whereMonth('tanggal', $month)->get()->groupBy(function ($transaction) {
+                return Carbon::parse($transaction->tanggal)->format('d');
+            })->toArray();
+        }
+        $labels = array_keys($transactions);
+        $data = [];
+        foreach ($transactions as $transaction) {
+            array_push($data, count($transaction));
+        }
+
+        return response()->json([
+            'labels' => $labels,
+            'data' => $data
+        ]);
     }
 }

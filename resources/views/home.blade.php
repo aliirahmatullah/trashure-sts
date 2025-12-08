@@ -43,7 +43,7 @@
     </section>
 
     {{-- ABOUT SECTION --}}
-    <section id="about" class="bg-emerald-800 py-16 md:py-24">
+    <section class="bg-emerald-800 py-16 md:py-24">
         <div class="max-w-7xl mx-auto px-6 md:px-12 grid md:grid-cols-2 gap-12 items-center">
             <div class="text-emerald-50 space-y-6">
                 <h2 class="text-3xl md:text-5xl font-extrabold leading-tight">About <span
@@ -79,7 +79,7 @@
     </section>
 
     {{-- HOW IT WORKS SECTION --}}
-    <section id="works" class="py-16 md:py-24 bg-white">
+    <section class="py-16 md:py-24 bg-white">
         <div class="max-w-6xl mx-auto px-6 md:px-12 text-center">
             <h2 class="text-3xl md:text-5xl font-extrabold text-emerald-700 mb-4">How it <span
                     class="text-amber-400">Works?</span></h2>
@@ -192,18 +192,18 @@
             </div>
             {{-- footer --}}
             <div class="px-5 pb-4 flex justify-end items-center gap-3">
-    <button onclick="closeModal()"
-            class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition">
-        Batal
-    </button>
-    <form id="formTukar" method="POST" action="">
-        @csrf
-        <button type="submit"
-            class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition">
-            Tukar Hadiah
-        </button>
-    </form>
-</div>
+                <button onclick="closeModal()"
+                    class="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition">
+                    Batal
+                </button>
+                <form id="formTukar" method="POST" action="">
+                    @csrf
+                    <button type="submit"
+                        class="px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition">
+                        Tukar Hadiah
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -213,7 +213,7 @@
             document.getElementById('modalDesc').innerText = data.desk;
             document.getElementById('modalPoin').innerText = parseInt(data.poin).toLocaleString('id-ID') + ' Poin';
             document.getElementById('modalImg').src = data.gambar;
-            document.getElementById('formTukar').action =  `/my/redeem/${data.id}`;
+            document.getElementById('formTukar').action = `/my/redeem/${data.id}`;
             document.getElementById('detailModal').classList.remove('hidden');
             document.getElementById('detailModal').classList.add('flex');
             document.body.classList.add('overflow-hidden');

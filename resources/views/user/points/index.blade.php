@@ -110,6 +110,7 @@
                                 @if ($redeem->status_tukar == 'pending') bg-yellow-200 text-yellow-700
                                 @elseif($redeem->status_tukar == 'approved') bg-blue-200 text-blue-700
                                 @elseif($redeem->status_tukar == 'done') bg-green-200 text-green-700
+                                @elseif($redeem->status_tukar == 'canceled') bg-red-200 text-red-700
                                 @else bg-gray-200 text-gray-700 @endif">
                                         {{ ucfirst($redeem->status_tukar) }}
                                     </span>

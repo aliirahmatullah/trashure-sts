@@ -27,29 +27,6 @@ class Transaction extends Model
         'status',
     ];
 
-    protected static function boot()
-   {
-    parent::boot();
-
-    static::creating(function ($model) {
-        // Format: TRX-YYYYMMDD-0001
-        $today = now()->format('Ymd');
-
-        // Ambil transaksi terakhir di hari ini
-        $lastTransaction = self::whereDate('created_at', now()->toDateString())
-            ->orderBy('id_transaksi', 'desc')
-            ->first();
-
-        // Ambil nomor urut berikutnya
-        $nextNumber = $lastTransaction
-            ? ((int)substr($lastTransaction->no_transaksi, -4)) + 1 : 1;
-
-        // Bentuk kode transaksi
-        $model->no_transaksi = 'TRSH-' . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-    });
-    }
-
-
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
@@ -64,6 +41,4 @@ class Transaction extends Model
     {
         return $this->belongsTo(Location::class, 'id_lokasi');
     }
-
-
 }

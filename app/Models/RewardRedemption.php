@@ -19,24 +19,14 @@ class RewardRedemption extends Model
     protected $fillable = [
         'id_user',
         'id_hadiah',
+        'no_transaksi',
         'jumlah_hadiah',
         'tanggal_tukar',
         'status_tukar',
+        'nama_penerima',
+        'alamat_pengiriman',
+        'no_hp_penerima',
     ];
-
-    protected static function boot()
-    {
-        parent::boot();
-        static::creating(function ($model) {
-            $today = now()->format('Y-m-d');
-            $lastRedeem = self::whereDate('tanggal_tukar', now()->toDateString())
-                ->orderBy('id_tukar', 'desc')
-                ->first();
-
-            $nextNumber = $lastRedeem ? ((int)substr($lastRedeem->no_transaksi, -4)) + 1 : 1;
-            $model->no_transaksi = 'THRR-' . $today . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-        });
-    }
 
     public function user()
     {

@@ -16,11 +16,10 @@
                 Sampah</a>
             <a href="{{ route('admin.redeems.export') }}"
                 class="rounded-md bg-blue-600 px-4 py-2 mr-2 text-sm font-medium text-white transition hover:bg-blue-700mom">Export
-                Data</a>
-            <a href="{{ route('admin.redeems.create') }}"
-                class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700">
-                Tambah Data
-            </a>
+                Data (.xlsx)</a>
+            <a href="{{ route('admin.redeems.export-pdf') }}"
+                class="rounded-md bg-red-600 px-4 py-2 mr-2 text-sm font-medium text-white transition hover:bg-blue-700mom">Export
+                Data (.pdf)</a>
         </div>
         <h1 class="text-xl font-semibold text-gray-800 mb-2">Data Transaksi</h1>
 
@@ -46,7 +45,8 @@
                                     class="rounded-full px-3 py-1 text-xs font-semibold
                                 @if ($key->status_tukar == 'pending') bg-yellow-200 text-yellow-700
                                 @elseif($key->status_tukar == 'approved') bg-blue-100 text-blue-700
-                                @elseif($key->status_tukar == 'done') bg-green-100 text-green-700 @endif">
+                                @elseif($key->status_tukar == 'done') bg-green-100 text-green-700
+                                @elseif($key->status_tukar == 'canceled') bg-red-100 text-red-700 @endif">
                                     {{ ucfirst($key->status_tukar) }}
                                 </span>
                             </td>
@@ -55,13 +55,14 @@
                                 <div class="flex items-center justify-center gap-2">
 
                                     {{-- Dropdown ganti status_tukar --}}
-                                    <form action="" method="POST" class="inline">
+                                    <form action="{{ route('admin.redeems.updateStatus', $key->id_tukar) }}" method="POST"
+                                        class="inline">
                                         @csrf @method('PATCH')
                                         <select name="status_tukar" onchange="this.form.submit()"
                                             class="rounded-md border border-gray-300 px-6 py-1 text-xs
                                                 @if ($key->status_tukar === 'pending') border-yellow-500 text-yellow-700
                                                 @elseif($key->status_tukar === 'approved') border-blue-400 text-blue-700
-                                                @elseif($key->status_tukar === 'completed') border-green-400 text-green-700
+                                                @elseif($key->status_tukar === 'done') border-green-400 text-green-700
                                                 @elseif($key->status_tukar === 'canceled') border-red-400 text-red-700 @endif">
                                             <option value="pending"
                                                 {{ $key->status_tukar === 'pending' ? 'selected' : '' }}>
@@ -71,16 +72,21 @@
                                                 Approved</option>
                                             <option value="done" {{ $key->status_tukar === 'done' ? 'selected' : '' }}>
                                                 Done</option>
+                                            <option value="canceled"
+                                                {{ $key->status_tukar === 'canceled' ? 'selected' : '' }}>
+                                                Canceled</option>
                                         </select>
                                     </form>
 
                                     <button
                                         onclick="openModal({
                                         no_transaksi: '{{ $key->no_transaksi }}',
-                                        nama: '{{ $key->user->nama }}',
+                                        nama: '{{ $key->nama_penerima }}',
                                         nama_hadiah: '{{ $key->reward->nama_hadiah }}',
                                         jumlah_hadiah: '{{ $key->jumlah_hadiah }}',
-                                        tanggal: '{{ $key->tanggal_tukar }}',
+                                        alamat_pengiriman: '{{ $key->alamat_pengiriman }}',
+                                        no_hp_penerima: '{{ $key->no_hp_penerima }}',
+                                        tanggal: '{{ \Carbon\Carbon::parse($key->tanggal_tukar)->format('d-m-Y') }}',
                                         status_tukar: '{{ ucfirst($key->status_tukar) }}'
                                     })"
                                         class="rounded-md bg-slate-600 px-3 py-1 text-xs font-medium text-white hover:bg-slate-700">
@@ -126,6 +132,10 @@
                 </p>
                 <p><span class="font-medium text-black">Jumlah Hadiah:</span> <span id="detJumlah"
                         class="text-black"></span></p>
+                <p><span class="font-medium text-black">Alamat Pengiriman:</span> <span id="detAlamat"
+                        class="text-black"></span></p>
+                <p><span class="font-medium text-black">No HP Penerima:</span> <span id="detNoHp"
+                        class="text-black"></span>
                 <p><span class="font-medium text-black">Tanggal:</span> <span id="detTanggal" class="text-black"></span></p>
                 <p><span class="font-medium text-black">Status:</span> <span id="detStatus" class="text-black"></span></p>
             </div>
@@ -144,6 +154,8 @@
             document.getElementById('detNama').textContent = data.nama ?? '-';
             document.getElementById('detHadiah').textContent = data.nama_hadiah ?? '-';
             document.getElementById('detJumlah').textContent = data.jumlah_hadiah ?? '-';
+            document.getElementById('detAlamat').textContent = data.alamat_pengiriman ?? '-';
+            document.getElementById('detNoHp').textContent = data.no_hp_penerima ?? '-';
             document.getElementById('detTanggal').textContent = data.tanggal ?? '-';
             document.getElementById('detStatus').textContent = data.status_tukar ?? '-';
             document.getElementById('detailModal').classList.remove('hidden');

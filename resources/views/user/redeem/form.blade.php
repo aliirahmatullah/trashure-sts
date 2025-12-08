@@ -27,29 +27,34 @@
         {{-- Form --}}
         <form action="{{ route('user.redeem.process', $reward->id_hadiah) }}" method="POST" class="space-y-4">
             @csrf
+
+            {{-- Nama --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700">Nama Penerima</label>
-                <input type="text" name="nama_penerima" required
-                    class="w-full pl-10 pr-4 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                <input type="text" name="nama_penerima" value="{{ old('nama_penerima', auth()->user()->nama) }}" required
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500">
             </div>
 
+            {{-- Alamat --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700">Alamat Pengiriman</label>
-                <textarea name="alamat_pengiriman" required rows="3"
-                    class="w-full pl-10 pr-4 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"></textarea>
+                <textarea name="alamat_pengiriman" rows="3" required
+                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500">{{ old('alamat_pengiriman', auth()->user()->alamat) }}</textarea>
             </div>
 
+            {{-- No HP --}}
             <div>
                 <label class="block text-sm font-medium text-gray-700">No. HP Penerima</label>
-                <input type="text" name="no_hp_penerima" required
-                    class="w-full pl-10 pr-4 py-1.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                <input type="text" name="no_hp_penerima" value="{{ old('no_hp_penerima', auth()->user()->no_hp) }}"
+                    required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500">
             </div>
 
-            <button type="submit"
-                class="w-full px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition">
+            <button type="submit" class="w-full py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition">
                 Tukar
             </button>
         </form>
+
+
 
     </div>
 @endsection

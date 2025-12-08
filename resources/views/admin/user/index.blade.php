@@ -17,7 +17,7 @@
     {{-- Header & Tombol Tambah --}}
     <div class="mb-4 flex items-center justify-end">
         <a href="{{ route('admin.users.trash')}}" class="rounded-md bg-yellow-600 px-4 py-2 mr-2 text-sm font-medium text-white transition hover:bg-yellow-700">Data Sampah</a>
-        <a href="{{ route('admin.users.export')}}" class="rounded-md bg-blue-600 px-4 py-2 mr-2 text-sm font-medium text-white transition hover:bg-blue-700">Export Data</a>
+        <a href="{{ route('admin.users.export')}}" class="rounded-md bg-blue-600 px-4 py-2 mr-2 text-sm font-medium text-white transition hover:bg-blue-700">Export Data (.xlsx)</a>
         <a href="{{ route('admin.users.create') }}"
            class="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-700">
            Tambah Data
@@ -34,6 +34,7 @@
                     <th class="px-6 py-3 text-center">#</th>
                     <th class="px-6 py-3 text-center">Nama</th>
                     <th class="px-6 py-3 text-center">Email</th>
+                    <th class="px-6 py-3 text-center">Jumlah Poin</th>
                     <th class="px-6 py-3 text-center">Role</th>
                     <th class="px-6 py-3 text-center">Aksi</th>
                 </tr>
@@ -45,6 +46,14 @@
                     <td class="whitespace-nowrap px-6 py-3 text-center">{{ $key + 1 }}</td>
                     <td class="whitespace-nowrap px-6 py-3 text-center">{{ $u->nama }}</td>
                     <td class="whitespace-nowrap px-6 py-3 text-center">{{ $u->email }}</td>
+                    {{-- Poin ditampilkan untuk user saja, untuk admin dan staff tidak --}}
+                    <td class="whitespace-nowrap px-6 py-3 text-center">
+                        @if ($u->role === 'user')
+                            {{ $u->poin }}
+                        @else
+                            -
+                        @endif
+                    </td>
                     <td class="whitespace-nowrap px-6 py-3 text-center">
                         @php
                             $badge = match($u->role) {

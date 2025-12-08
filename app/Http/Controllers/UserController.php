@@ -202,7 +202,7 @@ class UserController extends Controller
     {
         $users = User::onlyTrashed()->find($id_user);
         $users->restore();
-        return redirect()->route('admin.users.index')->with('success', 'Berhasil mengembalikan data!');
+        return redirect()->route('admin.users.trash')->with('success', 'Berhasil mengembalikan data!');
     }
 
     public function deletePermanent($id_user)
