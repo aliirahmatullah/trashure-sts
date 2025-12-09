@@ -276,15 +276,15 @@ class TransactionController extends Controller
     public function dataChart()
     {
         $month = now()->format('m');
-        if (auth()->user()->role === 'admin') {
+
             $transactions = Transaction::with('user', 'wasteType', 'location')->whereMonth('tanggal', $month)->get()->groupBy(function ($transaction) {
                 return Carbon::parse($transaction->tanggal)->format('d');
             })->toArray();
-        } else {
+    
             $transactions = Transaction::with('user', 'wasteType', 'location')->where('id_lokasi', auth()->user()->id_lokasi)->whereMonth('tanggal', $month)->get()->groupBy(function ($transaction) {
                 return Carbon::parse($transaction->tanggal)->format('d');
             })->toArray();
-        }
+        
         $labels = array_keys($transactions);
         $data = [];
         foreach ($transactions as $transaction) {
@@ -294,6 +294,25 @@ class TransactionController extends Controller
         return response()->json([
             'labels' => $labels,
             'data' => $data
+        ]);
+    }
+
+    public function staffDataChart()
+    {
+        $month = now()->format('m');
+        $transactions = Transaction::with('user', 'wasteType', 'location')->where('id_lokasi', auth()->user()->id_lokasi)->whereMonth('tanggal', $month)->get()->groupBy(function ($transaction) {
+            return Carbon::parse($transaction->tanggal)->format('d');
+        })->toArray();
+
+        $staffLabels = array_keys($transactions);
+        $staffData = [];
+        foreach ($transactions as $transaction) {
+            array_push($staffData, count($transaction));
+        }
+
+        return response()->json([
+            'staffLabels' => $staffLabels,
+            'staffData' => $staffData
         ]);
     }
 }

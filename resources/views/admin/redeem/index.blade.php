@@ -21,7 +21,7 @@
                 class="rounded-md bg-red-600 px-4 py-2 mr-2 text-sm font-medium text-white transition hover:bg-blue-700mom">Export
                 Data (.pdf)</a>
         </div>
-        <h1 class="text-xl font-semibold text-gray-800 mb-2">Data Transaksi</h1>
+        <h1 class="text-xl font-semibold text-gray-800 mb-2">Data Redeem Reward</h1>
 
         <div class="overflow-hidden rounded-lg border border-gray-200 shadow-sm">
             <table class="min-w-full divide-y divide-gray-200 text-sm text-gray-700">

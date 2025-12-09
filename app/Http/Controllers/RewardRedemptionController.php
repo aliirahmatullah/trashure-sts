@@ -49,6 +49,10 @@ class RewardRedemptionController extends Controller
         $reward = Reward::findOrFail($id_hadiah);
         $user = auth()->user();
 
+        if ($user->poin < $reward->p_dibutuhkan) {
+            return redirect()->back()->with('error', 'Maaf, Poin anda tidak mencukupi!');
+        }
+
         DB::transaction(function () use ($user, $reward, $request) {
             $today = now()->format('Ymd');
             $lastRedeem = RewardRedemption::whereDate('tanggal_tukar', now()->format('Y-m-d'))

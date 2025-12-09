@@ -130,11 +130,11 @@ Route::middleware('isAdmin')->prefix('admin')->name('admin.')->group(function ()
         Route::delete('/delete-permanent/{id_tukar}', [RewardRedemptionController::class, 'deletePermanent'])->name('delete_permanent');
         // chart.js
     });
-});
+});     
 
 // Staff area
 Route::middleware('isStaff')->prefix('staff')->name('staff.')->group(function () {
-    Route::get('/transaction/chart', [RewardRedemptionController::class, 'dataChart'])->name('transactions.chart');
+    Route::get('/transaction/chart', [TransactionController::class, 'staffDataChart'])->name('transactions.chart');
     Route::get('/dashboard', function () {
         return view('staff.dashboard');
     })->name('dashboard');

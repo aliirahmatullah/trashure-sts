@@ -118,7 +118,7 @@
                             <!-- Navbar User  -->
                         @else
                             @if (request()->routeIs('home.reward.active'))
-                                <li>
+                                <li> 
                                     <a href="{{ route('home') }}"
                                         class="inline-flex items-center gap-2 text-gray-600 hover:text-teal-600">
                                         {{-- Icon home --}}
@@ -127,7 +127,7 @@
                                 </li>
                             @else
                                 <li>
-                                    <a href="#reward" class="nav-link text-gray-600 hover:text-teal-600">Redeem
+                                    <a href="{{ route('home.reward.active')}}" class="nav-link text-gray-600 hover:text-teal-600">Redeem
                                         Rewards</a>
                                 </li>
                                 <li>

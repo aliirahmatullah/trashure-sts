@@ -31,10 +31,10 @@
                     new Chart(ctx, {
                         type: 'bar',
                         data: {
-                            labels: response.labels,
+                            labels: response.staffLabels,
                             datasets: [{
                                 label: 'Jumlah Transaksi Sampah',
-                                data: response.data,
+                                data: response.staffData,
                                 backgroundColor: '#0d6efd',
                                 borderWidth: 1
                             }]
