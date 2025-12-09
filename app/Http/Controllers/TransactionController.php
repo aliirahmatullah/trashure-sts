@@ -280,10 +280,6 @@ class TransactionController extends Controller
             $transactions = Transaction::with('user', 'wasteType', 'location')->whereMonth('tanggal', $month)->get()->groupBy(function ($transaction) {
                 return Carbon::parse($transaction->tanggal)->format('d');
             })->toArray();
-    
-            $transactions = Transaction::with('user', 'wasteType', 'location')->where('id_lokasi', auth()->user()->id_lokasi)->whereMonth('tanggal', $month)->get()->groupBy(function ($transaction) {
-                return Carbon::parse($transaction->tanggal)->format('d');
-            })->toArray();
         
         $labels = array_keys($transactions);
         $data = [];
