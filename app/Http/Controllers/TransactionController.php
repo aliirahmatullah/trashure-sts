@@ -133,30 +133,30 @@ class TransactionController extends Controller
 
 
 
-    public function updateStatus(Request $request, $id_transaksi)
-    {
-        $request->validate(['status' => 'required|in:pending,approved,completed,canceled']);
+        public function updateStatus(Request $request, $id_transaksi)
+        {
+            $request->validate(['status' => 'required|in:pending,approved,completed,canceled']);
 
-        $trx = Transaction::findOrFail($id_transaksi);
-        $oldStatus = $trx->status;
-        $trx->update(['status' => $request->status]);
+            $trx = Transaction::findOrFail($id_transaksi);
+            $oldStatus = $trx->status;
+            $trx->update(['status' => $request->status]);
 
-        // kalau baru jadi "completed" → tambah poin
-        if ($request->status === 'completed' && $oldStatus !== 'completed') {
-            $user = User::find($trx->id_user);
-            $user->increment('poin', $trx->poin_didapat);
-            $user->increment('total_poin', $trx->poin_didapat);
+            // kalau baru jadi "completed" → tambah poin
+            if ($request->status === 'completed' && $oldStatus !== 'completed') {
+                $user = User::find($trx->id_user);
+                $user->increment('poin', $trx->poin_didapat);
+                $user->increment('total_poin', $trx->poin_didapat);
+            }
+
+            // kalau dicancel/ditolak & sebelumnya completed → kembalikan poin
+            if ($request->status !== 'completed' && $oldStatus === 'completed') {
+                $user = User::find($trx->id_user);
+                $user->decrement('poin', $trx->poin_didapat);
+                $user->decrement('total_poin', $trx->poin_didapat);
+            }
+
+            return back()->with('success', 'Status diperbarui.');
         }
-
-        // kalau dicancel/ditolak & sebelumnya completed → kembalikan poin
-        if ($request->status !== 'completed' && $oldStatus === 'completed') {
-            $user = User::find($trx->id_user);
-            $user->decrement('poin', $trx->poin_didapat);
-            $user->decrement('total_poin', $trx->poin_didapat);
-        }
-
-        return back()->with('success', 'Status diperbarui.');
-    }
 
     private function hitungPoin($id_jenis, $berat)
     {
@@ -280,7 +280,7 @@ class TransactionController extends Controller
             $transactions = Transaction::with('user', 'wasteType', 'location')->whereMonth('tanggal', $month)->get()->groupBy(function ($transaction) {
                 return Carbon::parse($transaction->tanggal)->format('d');
             })->toArray();
-        
+
         $labels = array_keys($transactions);
         $data = [];
         foreach ($transactions as $transaction) {

@@ -112,7 +112,7 @@ class RewardController extends Controller
     {
         $reward = Reward::find($id_hadiah);
         $reward->delete();
-        return redirect()->route('admin.rewards.index')->with('error', 'Berhasil menghapus data hadiah!');
+        return redirect()->route('admin.rewards.index')->with('success', 'Berhasil menghapus data hadiah!');
     }
 
     public function trash() {

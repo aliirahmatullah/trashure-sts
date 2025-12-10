@@ -105,7 +105,7 @@ class LocationController extends Controller
     {
         Location::where('id_lokasi', $id_lokasi)->delete();
         return redirect()->route('admin.locations.index')
-                         ->with('error`', 'Berhasil menghapus lokasi!');
+                         ->with('success', 'Berhasil menghapus lokasi!');
     }
 
     public function trash()

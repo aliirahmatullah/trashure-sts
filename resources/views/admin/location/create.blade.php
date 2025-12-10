@@ -32,7 +32,7 @@
         {{-- Provinsi --}}
         <div class="mb-5">
             <label class="mb-1 flex items-center text-sm font-medium text-gray-700">
-                Provinsi 
+                Provinsi
             </label>
             <select name="provinsi" id="provinsi" required
                     class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-green-500 focus:ring-green-400">
@@ -93,7 +93,7 @@ prov.addEventListener('change', async () => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        console.log("Data kota:", data); // <--- debug
+        console.log("Data kota:", data);
 
         city.innerHTML = '<option value="">Pilih Kota/Kab</option>';
         data.forEach(c => {

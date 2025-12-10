@@ -93,7 +93,7 @@
                                         berat: '{{ $key->berat }} kg',
                                         poin_didapat: '{{ $key->poin_didapat }}',
                                         lokasi: '{{ $key->location->nama_lok ?? '-' }}',
-                                        tanggal: '{{ \Carbon\Carbon::parse($key->tanggal    )->format('d-m-Y') }}',
+                                        tanggal: '{{ \Carbon\Carbon::parse($key->tanggal)->format('d-m-Y') }}',
                                         status: '{{ ucfirst($key->status) }}'
                                     })"
                                         class="rounded-md bg-slate-600 px-3 py-1 text-xs font-medium text-white hover:bg-slate-700">

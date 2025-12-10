@@ -66,7 +66,7 @@
                             </form>
 
                             {{-- Hapus Permanen --}}
-                            <form action="{{ route('admin.redeems.delete_permanent', $trash->id_transaksi) }}" method="POST">
+                            <form action="{{ route('admin.redeems.delete_permanent', $trash->id_tukar) }}" method="POST">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit"

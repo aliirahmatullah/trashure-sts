@@ -189,7 +189,7 @@ class UserController extends Controller
     public function destroy(string $id_user)
     {
         User::where('id_user', $id_user)->delete();
-        return redirect()->route('admin.users.index')->with('error', 'Berhasil menghapus data!');
+        return redirect()->route('admin.users.index')->with('success', 'Berhasil menghapus data!');
     }
 
     public function trash()

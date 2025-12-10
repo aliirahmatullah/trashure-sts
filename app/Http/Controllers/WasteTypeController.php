@@ -117,7 +117,7 @@ class WasteTypeController extends Controller
     public function destroy($id_jenis)
     {
         $wasteType = WasteType::where('id_jenis', $id_jenis)->delete();
-        return redirect()->route('admin.waste-types.index')->with('error', 'Berhasil menghapus jenis sampah!');
+        return redirect()->route('admin.waste-types.index')->with('success', 'Berhasil menghapus jenis sampah!');
     }
 
     public function trash()
